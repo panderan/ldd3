@@ -1,0 +1,11 @@
+kernel-source
+*.ko.cmd
+*.mod.o.cmd
+*.o.cmd
+*modules.order
+*.o
+*.ko
+*.mod.c
+*.mod.o
+*.symvers
+*.tmp_versions
