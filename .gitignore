@@ -9,3 +9,4 @@ kernel-source
 *.mod.o
 *.symvers
 *.tmp_versions
+examples
