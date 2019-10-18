@@ -10,3 +10,4 @@ kernel-source
 *.symvers
 *.tmp_versions
 examples
+*.swp
