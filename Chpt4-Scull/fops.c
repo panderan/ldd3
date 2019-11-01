@@ -37,11 +37,7 @@ int scull_open(struct inode *inode, struct file *filp)
     filp->private_data = dev;
 
     if ((filp->f_flags & O_ACCMODE) == O_WRONLY) {
-        if (down_interruptible(&dev->sem)) {
-            return -ERESTARTSYS;
-        }
         scull_trim(dev);
-        up(&dev->sem);
     }
     return 0;
 }
@@ -87,9 +83,6 @@ ssize_t scull_read(struct file *filp, char __user *buf, size_t count, loff_t *f_
     int item = 0, s_pos = 0, q_pos = 0, rest = 0;
     ssize_t retval = 0;
 
-    if (down_interruptible(&dev->sem)) {
-        return -ERESTARTSYS;
-    }
     if (*f_pos >= dev->size) {
         goto out;
     }
@@ -120,7 +113,6 @@ ssize_t scull_read(struct file *filp, char __user *buf, size_t count, loff_t *f_
     retval = count;
 
 out:
-    up(&dev->sem);
     return retval;
 }
 
@@ -134,10 +126,6 @@ ssize_t scull_write(struct file *filp, const char __user *buf, size_t count, lof
     int item = 0, s_pos = 0, q_pos = 0, rest = 0;
     ssize_t retval = -ENOMEM;
 
-    if (down_interruptible(&dev->sem)) {
-        return -ERESTARTSYS;
-    }
-    
     item = (long)*f_pos / itemsize;
     rest = (long)*f_pos % itemsize;
     s_pos = rest / quantum;
@@ -179,7 +167,6 @@ ssize_t scull_write(struct file *filp, const char __user *buf, size_t count, lof
     }
 
 out:
-    up(&dev->sem);
     return retval;
 }
 

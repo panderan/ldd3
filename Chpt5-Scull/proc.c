@@ -12,6 +12,9 @@ int scull_read_procmem(char *buf, char **start, off_t offset, \
     for (i = 0; i < scull_nr_devs && len <= limit; i++) {
         struct scull_dev *d = &scull_devices[i];
         struct scull_qset *qs = d->data;
+        if (down_interruptible(&d->sem)) {
+            return -ERESTARTSYS;
+        }
         len += sprintf(buf+len, "\nDevice %i: qset %i, q %i, sz %li\n",
                         i, d->qset, d->quantum, d->size);
         for(; qs && len <= limit; qs = qs->next) {
@@ -25,6 +28,7 @@ int scull_read_procmem(char *buf, char **start, off_t offset, \
                 }
             }
         }
+        up(&scull_devices[i].sem);
     }
     *eof=1;
     return len;

@@ -1,7 +1,6 @@
 #ifndef _SCULL_H_
 #define _SCULL_H_
 
-#include <linux/semaphore.h>
 #include <linux/cdev.h>
 
 #ifndef SCULL_MAJOR
@@ -43,7 +42,6 @@ struct scull_dev {
 	int quantum;                /* 量子大小 */
 	int qset;                   /* 数组大小（scull_qset.data 的长度） */
 	unsigned long size;         /* 总数据量大小 */
-    struct semaphore sem;       /* 互斥信号量 */
 	struct cdev cdev;	        /* 字符设备结构	*/
 };
 

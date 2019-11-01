@@ -8,7 +8,7 @@
 
 #include "scull.h"
 #include "fops.h"
-
+#include "proc.h"
 
 int scull_major =   SCULL_MAJOR;
 int scull_minor =   0;
@@ -64,6 +64,10 @@ void scull_cleanup_module(void)
 		}
 		kfree(scull_devices);
 	}
+
+#ifdef SCULL_DEBUG
+    scull_remove_proc();
+#endif
 
     /* 如果设备注册失败则不应调用 cleanup_module */
 	unregister_chrdev_region(devno, scull_nr_devs);
@@ -124,8 +128,13 @@ int scull_init_module(void)
 	for (i = 0; i < scull_nr_devs; i++) {
 		scull_devices[i].quantum = scull_quantum;
 		scull_devices[i].qset = scull_qset;
+        init_MUTEX(&scull_devices[i].sem);
 		scull_setup_cdev(&scull_devices[i], i);
 	}
+
+#ifdef SCULL_DEBUG
+    scull_create_proc();
+#endif
 
 	return 0;
 

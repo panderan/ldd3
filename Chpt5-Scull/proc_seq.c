@@ -31,6 +31,10 @@ int scull_seq_show(struct seq_file *s, void *v)
     struct scull_qset *d = NULL;
     int i = 0;
 
+    if (down_interruptible(&dev->sem)) {
+        return -ERESTARTSYS;
+    }
+
     seq_printf(s, "\nDevice %i: qset: %i, q :%i, sz: %li\n",
                 (int)(dev-scull_devices), dev->qset, dev->quantum, dev->size);
     for (d=dev->data; d; d=d->next) {
@@ -43,6 +47,7 @@ int scull_seq_show(struct seq_file *s, void *v)
             }
         }
     }
+    up(&dev->sem);
     return 0;
 }
 
