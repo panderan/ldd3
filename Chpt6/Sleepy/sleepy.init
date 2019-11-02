@@ -1,0 +1,64 @@
+#!/bin/sh
+
+DEVICE="sleepy"
+PREFIX="sleepy"
+INSMOD=insmod
+KERNEL=`uname -r`
+MODDIR="/lib/modules/${KERNEL}/extra"
+MOD_SYSFS="/sys/module/sleepy"
+
+
+if [ "$(id -u)" != "0" ]; then
+    echo "You must be root to load or unload kernel modules"
+    exit 1
+fi
+
+function load_device() {
+    if [ -f $MODDIR/sleepy.ko ]; then
+        devpath=$MODDIR/sleepy.ko
+    else
+        echo "module sleepy.ko not found"
+        exit 1;
+    fi
+
+    if $INSMOD $devpath $OPTIONS; then
+        MAJOR=`cat /proc/devices | awk '{if($2=="'${DEVICE}'") print $1}'`
+        NR_DEVS=`cat ${MOD_SYSFS}/parameters/sleepy_nr_devs`
+        NR_DEVS=`expr $NR_DEVS - 1`
+        while [ ${NR_DEVS} -ge 0 ]; do
+            rm -f /dev/${DEVICE}${NR_DEVS}
+            mknod /dev/${DEVICE}${NR_DEVS} c $MAJOR ${NR_DEVS}
+            NR_DEVS=`expr $NR_DEVS - 1`
+        done
+    else
+        echo "FAILED!"
+    fi
+}
+
+function unload_device() {
+    rmmod ${DEVICE}
+    find /dev | grep ${DEVICE} | xargs -I {} rm -f {}
+}
+
+
+case "$1" in
+    start)
+    echo -n "Loading ${DEVICE}"
+    load_device
+    echo "."
+    ;;
+    stop)
+    echo -n "Unloading ${DEVICE}"
+    unload_device
+    ;;
+    force-reload|restart)
+    echo -n "Unloading ${DEVICE}"
+    unload_device
+    load_device
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart|force-reload}"
+    exit 1
+esac
+
+exit 0

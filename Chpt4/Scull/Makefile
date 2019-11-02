@@ -1,4 +1,4 @@
-KERNEL_DIR=../kernel-source
+KERNEL_DIR=../../kernel-source
 CUR_DIR=$(shell pwd)
 CROSS_COMPILE_PREFIX=x86_64-linux-uclibc-
 

@@ -1,9 +1,11 @@
-KERNEL_DIR=../kernel-source
+KERNEL_DIR=../../kernel-source
 CUR_DIR=$(shell pwd)
 CROSS_COMPILE_PREFIX=x86_64-linux-uclibc-
 
+EXTRA_CFLAGS+=-DSCULL_DEBUG
+
 obj-m := scull.o
-scull-objs := main.o fops.o
+scull-objs := proc_seq.o proc.o fops.o main.o
 
 all:
 	make -C $(KERNEL_DIR) M=$(CUR_DIR) \
