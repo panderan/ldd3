@@ -1,6 +1,7 @@
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
+#include <linux/fs.h>
 #include <linux/slab.h>
 #include "scullpipe.h"
 #include "sc_pipe_fops.h"
@@ -17,8 +18,9 @@ module_param(scullpipe_nr_devs, int, S_IRUGO);
 // scullpipe 的设备结构，在scullpipe_init_module 中分配内存
 struct scullpipe_dev *scullpipe_devices;
 
+
 /// 分配设备号
-int scullpipe_require_devnum()
+int scullpipe_require_devnum(void)
 {
     int result = 0;
 	dev_t dev = 0;
@@ -39,7 +41,7 @@ int scullpipe_require_devnum()
     return result;
 }
 
-/// 初始化设备
+/// 初始化单个设备
 /**
  * 设置每一个设备结构体，并进行安装
  */
@@ -67,12 +69,13 @@ void scullpipe_setup_cdev(struct scullpipe_dev *dev, int index)
 		printk(KERN_NOTICE "Error %d adding scullpipe%d", err, index);
 }
 
-int scullpipe_create()
+/// 创建 scullpipe 设备
+int scullpipe_create(void)
 {
     int result = 0, i = 0;
 
     // 申请设备号
-    if (result=scullpipe_require_devnum()) {
+    if ((result=scullpipe_require_devnum()) != 0) {
         return result;
     }
 
@@ -91,3 +94,20 @@ int scullpipe_create()
     return 0;
 }
 
+/// 释放 scullpipe 设备
+void scullpipe_destroy(void)
+{
+	int i = 0;
+	dev_t devno = MKDEV(scullpipe_major, scullpipe_minor);
+
+	/* 清理设备结构体 */
+	if (scullpipe_devices) {
+		for (i = 0; i < scullpipe_nr_devs; i++) {
+			cdev_del(&scullpipe_devices[i].cdev);
+		}
+		kfree(scullpipe_devices);
+	}
+
+    /* 如果设备注册失败则不应调用 cleanup_module */
+	unregister_chrdev_region(devno, scullpipe_nr_devs);
+}

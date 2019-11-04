@@ -30,8 +30,9 @@ extern int scullpipe_major;
 extern int scullpipe_minor;
 extern int scullpipe_nr_devs;
 
-int scullpipe_require_devnum();
+int scullpipe_require_devnum(void);
 void scullpipe_setup_cdev(struct scullpipe_dev *dev, int index);
-int scullpipe_create();
+int scullpipe_create(void);
+void scullpipe_destroy(void);
 
 #endif /* _SCULLPIPE_H_ */
