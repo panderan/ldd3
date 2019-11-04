@@ -1,5 +1,5 @@
-#ifndef _SCULL_FOPS_
-#define _SCULL_FOPS_
+#ifndef _SLEEPY_FOPS_
+#define _SLEEPY_FOPS_
 
 #include "sleepy.h"
 
